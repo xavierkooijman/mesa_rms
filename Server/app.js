@@ -13,8 +13,6 @@ app.use(helmet());
 app.use(cors());
 
 // Routes
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/restaurants", require("./routes/restaurantRoutes"));
 
 // Error handler
 app.use(errorHandler);
