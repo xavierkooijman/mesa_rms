@@ -1,14 +1,25 @@
 const db = require("../config/db");
 const argon2 = require("argon2");
 const catchAsync = require("../utils/catchAsync");
+const usersModel = require("../models/users.model");
 
 const createUser = catchAsync(async (req, res) => {
-  const { email, firstName, lastName, password } = req.body;
+  const { firstName, lastName, email, password, roleId, statusId } = req.body;
 
   const hashedPassword = await argon2.hash(password);
 
-  res.status(200).send({
-    message: `User ${firstName}, hashedPassword: ${hashedPassword}`,
+  const user = usersModel.createUser({
+    firstName,
+    lastName,
+    email,
+    hashedPassword,
+    roleId,
+    statusId,
+  });
+
+  res.status(201).send({
+    message: "User created successfully",
+    data: user,
   });
 });
 

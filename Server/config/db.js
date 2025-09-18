@@ -2,11 +2,19 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const writePool = new Pool({
-  connectionString: process.env.WRITE_DATABASE_URL,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.WRITE_USER_NAME,
+  password: process.env.WRITE_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 const readPool = new Pool({
-  connectionString: process.env.READ_DATABASE_URL,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.READ_USER_NAME,
+  password: process.env.READ_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 writePool.on("connect", () => {
