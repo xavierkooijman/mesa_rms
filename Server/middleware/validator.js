@@ -1,6 +1,10 @@
 const Joi = require("joi");
 
-const validator = (schema) => (payload) =>
-  schema.validate(payload, { abortEarly: false });
+const validate = (schema) => (req, res, next) => {
+  const { error, value } = schema.validate(req.body, { abortEarly: false });
+  if (error) return next(error);
+  req.body = value;
+  next();
+};
 
-module.exports = validator;
+module.exports = validate;
