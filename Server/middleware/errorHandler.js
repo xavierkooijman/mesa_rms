@@ -1,12 +1,15 @@
 const AppError = require("../utils/AppError");
+const errorCodes = require("../utils/errorCodes");
 
 const errorHandler = (error, req, res, next) => {
-  console.log(error);
-
-  if (error.name === "ValidationError") {
+  if (error.isJoi) {
     return res.status(400).json({
-      type: "ValidationError",
-      details: error.details,
+      errorCode: errorCodes.VALIDATION_ERROR,
+      message: "Invalid request data",
+      details: error.details.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      })),
     });
   }
 
@@ -17,7 +20,10 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  return res.status(500).json("Something went wrong");
+  return res.status(500).json({
+    errorCode: errorCodes.INTERNAL_SERVER_ERROR,
+    message: "Something went wrong",
+  });
 };
 
 module.exports = errorHandler;

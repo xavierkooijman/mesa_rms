@@ -13,7 +13,7 @@ const createUser = async (data) => {
 };
 
 const findByEmail = async (email) => {
-  const query = "SELECT * FROM users WHERE email = $1";
+  const query = "SELECT id FROM users WHERE email = $1 LIMIT 1";
 
   const { rows } = await db.readPool.query(query, [email]);
   return rows[0];
