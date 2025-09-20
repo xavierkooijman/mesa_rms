@@ -3,12 +3,14 @@ const catchAsync = require("../utils/catchAsync");
 const usersModel = require("../models/users.model");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const createUser = catchAsync(async (req, res) => {
   const { firstName, lastName, email, password, roleId, statusId } = req.body;
 
   //check if email is already in use
-  const emailExists = await usersModel.findByEmail(email);
+  const emailExists = await usersModel.checkIfEmailExists(email);
 
   if (emailExists) {
     throw new AppError(
@@ -43,8 +45,52 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const login = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
   //check if user with email and password exists
-  //create access token and refresh token
+
+  const user = await usersModel.getUserByEmail(email);
+
+  if (!user) {
+    throw new AppError(
+      "Invalid email or password",
+      ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+      401
+    );
+  }
+
+  const password_match = await argon2.verify(user.password_hash, password);
+
+  if (password_match) {
+    const accessToken = jwt.sign(
+      {
+        sub: user.id,
+        role: user.role,
+      },
+      process.env.ACCESS_JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    const refreshToken = jwt.sign(
+      { sub: user.id },
+      process.env.REFRESH_JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.cookie("jwt", refreshToken, {
+      htttpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 * 30,
+    });
+
+    res.status(200).json({ accessToken });
+  } else {
+    throw new AppError(
+      "Invalid email or password",
+      ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+      401
+    );
+  }
 });
 
-module.exports = { createUser };
+module.exports = { createUser, login };

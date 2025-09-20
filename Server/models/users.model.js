@@ -12,11 +12,19 @@ const createUser = async (data) => {
   return rows[0];
 };
 
-const findByEmail = async (email) => {
+const checkIfEmailExists = async (email) => {
   const query = "SELECT id FROM users WHERE email = $1 LIMIT 1";
 
   const { rows } = await db.readPool.query(query, [email]);
   return rows[0];
 };
 
-module.exports = { createUser, findByEmail };
+const getUserByEmail = async (email) => {
+  const query =
+    "SELECT id, email, password_hash FROM users WHERE email = $1 LIMIT 1";
+
+  const { rows } = await db.readPool.query(query, [email]);
+  return rows[0];
+};
+
+module.exports = { createUser, checkIfEmailExists, getUserByEmail };

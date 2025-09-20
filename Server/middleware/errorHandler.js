@@ -20,6 +20,12 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
+  if (error.type === "entity.parse.failed") {
+    return res.status(400).json({
+      message: "Invalid JSON payload! Check if your body data is valid JSON.",
+    });
+  }
+
   return res.status(500).json({
     errorCode: errorCodes.INTERNAL_SERVER_ERROR,
     message: "Something went wrong",
