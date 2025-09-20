@@ -1,10 +1,11 @@
 const argon2 = require("argon2");
 const catchAsync = require("../utils/catchAsync");
-const usersModel = require("../models/users.model");
+const usersModel = require("../models/users.models");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const crypto = require("crypto");
 
 const createUser = catchAsync(async (req, res) => {
   const { firstName, lastName, email, password, roleId, statusId } = req.body;
@@ -16,7 +17,7 @@ const createUser = catchAsync(async (req, res) => {
     throw new AppError(
       "A user with this email already exists",
       ERROR_CODES.USER_EXISTS,
-      400
+      409
     );
   }
 
@@ -77,6 +78,20 @@ const login = catchAsync(async (req, res) => {
       process.env.REFRESH_JWT_SECRET,
       { expiresIn: "30d" }
     );
+
+    const decodedToken = jwt.decode(refreshToken);
+    const expires_at = new Date(decodedToken.exp * 1000);
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    await usersModel.createRefreshToken({
+      hashedToken,
+      userId: user.id,
+      expires_at,
+    });
 
     res.cookie("jwt", refreshToken, {
       htttpOnly: true,

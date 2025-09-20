@@ -27,4 +27,21 @@ const getUserByEmail = async (email) => {
   return rows[0];
 };
 
-module.exports = { createUser, checkIfEmailExists, getUserByEmail };
+const createRefreshToken = async (data) => {
+  const { hashedToken, userId, expires_at } = data;
+
+  const query =
+    "INSERT INTO refresh_tokens(token_hash, user_id, expires_at) VALUES($1, $2, $3) RETURNING id";
+
+  const values = [hashedToken, userId, expires_at];
+
+  const { rows } = await db.writePool.query(query, values);
+  return rows[0];
+};
+
+module.exports = {
+  createUser,
+  checkIfEmailExists,
+  getUserByEmail,
+  createRefreshToken,
+};
