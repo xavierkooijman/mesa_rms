@@ -6,7 +6,6 @@ const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const crypto = require("crypto");
 
 const createUser = catchAsync(async (req, res) => {
   const { firstName, lastName, email, password, roleId, statusId } = req.body;
@@ -92,10 +91,7 @@ const loginHandler = catchAsync(async (req, res) => {
   const decodedToken = jwt.decode(refreshToken);
   const expires_at = new Date(decodedToken.exp * 1000);
 
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(refreshToken)
-    .digest("hex");
+  const hashedToken = await argon2.hash(refreshToken);
 
   await refreshTokenModel.saveRefreshToken({
     tokenId,

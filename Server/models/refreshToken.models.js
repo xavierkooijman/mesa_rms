@@ -13,9 +13,10 @@ const saveRefreshToken = async (data) => {
 
 const getRefreshToken = async (tokenId) => {
   const query =
-    "SELECT token_hash FROM refresh_tokens WHERE revoked IS NOT TRUE AND id = $1";
+    "SELECT token_hash, user_id FROM refresh_tokens WHERE revoked IS NOT TRUE AND token_id = $1";
 
   const { rows } = await db.readPool.query(query, [tokenId]);
+  return rows[0];
 };
 
 module.exports = { saveRefreshToken, getRefreshToken };
