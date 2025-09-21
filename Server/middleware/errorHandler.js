@@ -27,6 +27,16 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
+  if (error.code) {
+    console.error("Postgres error:", {
+      code: error.code,
+      message: error.message,
+      detail: error.detail,
+      hint: error.hint,
+      stack: error.stack,
+    });
+  }
+
   return res.status(500).json({
     errorCode: errorCodes.INTERNAL_SERVER_ERROR,
     message: "Something went wrong",

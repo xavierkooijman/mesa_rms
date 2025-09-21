@@ -12,7 +12,7 @@ router.post(
 router.post(
   "/login",
   validate(userValidation.loginSchema),
-  usersController.login
+  usersController.loginHandler
 );
 
 module.exports = router;
