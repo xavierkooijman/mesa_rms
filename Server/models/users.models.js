@@ -21,7 +21,7 @@ const checkIfEmailExists = async (email) => {
 
 const getUserByEmail = async (email) => {
   const query =
-    "SELECT id, email, password_hash FROM users WHERE email = $1 LIMIT 1";
+    "SELECT id, password_hash, role_id FROM users WHERE email = $1 LIMIT 1";
 
   const { rows } = await db.readPool.query(query, [email]);
   return rows[0];
