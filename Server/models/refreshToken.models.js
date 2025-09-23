@@ -19,4 +19,10 @@ const getRefreshToken = async (tokenId) => {
   return rows[0];
 };
 
-module.exports = { saveRefreshToken, getRefreshToken };
+const deleteRefreshToken = async (tokenId) => {
+  const query = "DELETE FROM refresh_tokens WHERE token_id = $1";
+
+  await db.writePool.query(query, [tokenId]);
+};
+
+module.exports = { saveRefreshToken, getRefreshToken, deleteRefreshToken };

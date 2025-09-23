@@ -116,8 +116,34 @@ const loginHandler = catchAsync(async (req, res) => {
 
 const logoutHandler = catchAsync(async (req, res) => {
   // delete accessToken in the client side
+
   // delete refreshToken and context cookies
+  const refreshToken = req.cookies[isProd ? "__Host-refresh" : "refresh"];
+
+  res.clearCookie(isProd ? "__Host-ctx" : "ctx", {
+    httpOnly: true,
+    sameSite: "Strict",
+    path: "/",
+    secure: isProd,
+  });
+
+  res.clearCookie(isProd ? "__Host-refresh" : "refresh", {
+    httpOnly: true,
+    sameSite: "Strict",
+    path: "/",
+    secure: isProd,
+  });
+
+  jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err) => {
+    if (err) {
+      return res.sendStatus(204);
+    }
+  });
+
   // delete refreshToken from the db
+  decoded = jwt.decode(refreshToken);
+  await refreshTokenModel.deleteRefreshToken(decoded.tokenId);
+  res.sendStatus(204);
 });
 
 module.exports = { createUser, loginHandler, logoutHandler };
