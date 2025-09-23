@@ -1,13 +1,7 @@
-#Express.js Boilerplate
+# MESA
 
-A lightweight and modular Node.js boilerplate built with Express.js.
+MESA is a restaurant management system designed to organise various restaurant operations in one place. Having grown up loving food and working in restaurants, I always found that the systems used were outdated and poorly designed, making them visually hard to understand and clunky to use. There were physical tickets, poor data analysis, manual inventory management and constant phone rigging for reservations. Staff had to write down their clock-ins and clock-outs and work schedules were complicated. Services were spread out across different companies: one for point of sale, another for reservations, another for staff management, and so on. MESA solves these problems by supplying a fully customisable, easy-to-set-up, centralised restaurant management system available on the web. There is no need to install software or have a technician install the service, simply use your computer and access everything related to managing your restaurant with a simple, easy-to-understand and easy-to-use webapp. You can manage orders, reservations, staff, work schedules, clock-ins and clock-outs, inventory, recipes, tables and takeaways in one centralised service.
 
-Basic Authentication System.
-
-Error Handling Middleware – Centralized error handling for consistent and clean API responses.
-
-PostgreSQL Database Integration – PostgreSQL connection using pg.
-
-Modular Folder Structure – Organized folders for routes, controllers, models, middleware and utils.
-
-Basic Routing Setup – Predefined routes for authentication and sample resources.
+© 2025 Xavier Kooijman. All rights reserved.
+This repository is public for portfolio purposes only.
+You may view the code, but may not copy, distribute, or use it in any way.
