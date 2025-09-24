@@ -10,9 +10,7 @@ const createMenuItem = async (data) => {
   return rows[0];
 };
 
-const checkIfMenuItemExists = async (data) => {
-  const { restaurantId, name } = data;
-
+const checkIfMenuItemExists = async (restaurantId, name) => {
   const query =
     "SELECT id FROM menu_items WHERE restaurant_id = $1 AND name = $2";
 
@@ -21,3 +19,5 @@ const checkIfMenuItemExists = async (data) => {
   const { rows } = await db.readPool.query(query, values);
   return rows[0];
 };
+
+module.exports = { createMenuItem, checkIfMenuItemExists };

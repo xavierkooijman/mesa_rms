@@ -2,7 +2,6 @@ const catchAsync = require("../utils/catchAsync");
 const restaurantsModel = require("../models/restaurants.models");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
-const errorCodes = require("../utils/errorCodes");
 
 const createRestaurant = catchAsync(async (req, res) => {
   const { name } = req.body;
@@ -16,7 +15,7 @@ const createRestaurant = catchAsync(async (req, res) => {
   if (restaurantExists) {
     throw new AppError(
       "A restaurant with this name already exists",
-      errorCodes.RESTAURANT_EXISTS,
+      ERROR_CODES.RESTAURANT_EXISTS,
       409
     );
   }
@@ -42,7 +41,7 @@ const updateRestaurantName = catchAsync(async (req, res) => {
   if (restaurantExists) {
     throw new AppError(
       "A restaurant with this name already exists",
-      errorCodes.RESTAURANT_EXISTS,
+      ERROR_CODES.RESTAURANT_EXISTS,
       409
     );
   }
