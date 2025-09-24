@@ -21,6 +21,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/users", require("./routes/user.routes"));
+app.use("/restaurants", require("./routes/restaurant.routes"));
 
 // Error handler
 app.use(errorHandler);

@@ -5,8 +5,8 @@ const ERROR_CODES = require("../utils/errorCodes");
 const errorCodes = require("../utils/errorCodes");
 
 const createRestaurant = catchAsync(async (req, res) => {
-  const { ownerId } = req.params;
   const { name } = req.body;
+  const ownerId = req.token.sub;
 
   const restaurantExists = await restaurantsModel.checkIfRestaurantExists(
     name,
@@ -20,6 +20,7 @@ const createRestaurant = catchAsync(async (req, res) => {
       409
     );
   }
+  console.log(ownerId);
 
   const restaurant = await restaurantsModel.createRestaurant(name, ownerId);
 

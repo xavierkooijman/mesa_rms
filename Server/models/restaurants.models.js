@@ -1,25 +1,29 @@
 const db = require("../config/db");
 
-const createRestaurant = async (data) => {
-  const { name, ownerId } = data;
-  const query =
-    "INSERT INTO restaurants(restaurant_name,owner_id) VALUES($1, $2) RETURNING restaurant_name, owner_id";
+const createRestaurant = async (name, ownerId) => {
+  await db.writePool.query("BEGIN");
 
-  const values = [name, ownerId];
+  console.log(name, ownerId);
+  await db.writePool.query(`SET LOCAL app.jwt_ownerId = ${ownerId}`);
 
-  const { rows } = await db.writePool(query, values);
+  const { rows } = await db.writePool.query(
+    `INSERT INTO mesa_app.restaurants (restaurant_name, owner_id)
+       VALUES ($1, $2)
+       RETURNING restaurant_name, owner_id`,
+    [name, ownerId]
+  );
+
+  await db.writePool.query("COMMIT");
   return rows[0];
 };
 
-const checkIfRestaurantExists = async (data) => {
-  const { name, ownerId } = data;
-
+const checkIfRestaurantExists = async (name, ownerId) => {
   const query =
     "SELECT id FROM restaurants WHERE restaurant_name = $1 AND owner_id = $2";
 
   const values = [name, ownerId];
-
-  const { rows } = await db.readPool(query, values);
+  await db.readPool.query(`SET app.jwt_ownerId = ${ownerId}`);
+  const { rows } = await db.readPool.query(query, values);
   return rows[0];
 };
 

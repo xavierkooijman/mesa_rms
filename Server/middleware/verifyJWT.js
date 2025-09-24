@@ -3,6 +3,7 @@ require("dotenv").config();
 const ERROR_CODES = require("../utils/errorCodes");
 const AppError = require("../utils/AppError");
 const isProd = process.env.NODE_ENV === "production";
+const crypto = require("crypto");
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -32,6 +33,7 @@ const verifyJWT = (req, res, next) => {
     }
 
     const contextRaw = req.cookies[isProd ? "__Host-ctx" : "ctx"];
+
     if (!contextRaw) {
       return next(
         new AppError(
@@ -62,7 +64,7 @@ const verifyJWT = (req, res, next) => {
       );
     }
 
-    req.decoded = decoded;
+    req.token = decoded;
     next();
   });
 };
