@@ -1,6 +1,8 @@
 const argon2 = require("argon2");
 const catchAsync = require("../utils/catchAsync");
 const usersModel = require("../models/users.models");
+const staffModel = require("../models/staff.models");
+const restaurantModel = require("../models/restaurants.models");
 const refreshTokenModel = require("../models/refreshToken.models");
 const tokenContext = require("../utils/tokenContext");
 const signTokens = require("../utils/signTokens");
@@ -71,6 +73,47 @@ const loginHandler = catchAsync(async (req, res) => {
     );
   }
 
+  const tenant = {};
+
+  if ((user.user_role = "staff")) {
+    const staffMembershipCount = await staffModel.getStaffMembershipCount(
+      user.id
+    );
+    //if a user only has one staff membership we can set the tenant context,  else if the user has multiple staff memberships we set the tenant context to null. A staff member must always have a role.
+
+    if (staffMembershipCount == 1) {
+      const staff = await staffModel.getStaffByUserId(user.id);
+      tenant = {
+        restaurantId: staff.restaurant_id,
+        staffId: staff.id,
+        staffRole: staff.staff_role,
+      };
+    } else {
+      tenant = {
+        restaurantId: null,
+        staffId: null,
+        staffRole: null,
+      };
+    }
+  } else if ((user.user_role = "owner")) {
+    const ownerRestaurantCount = await restaurantModel.getOwnerRestaurantCount(
+      user.id
+    );
+    // if user role is owner and only has one restaurant we can set the tenant context otherwise tenant fields must be null. staff related fields always null for owner roles.
+    if (ownerRestaurantCount == 1) {
+      tenant = {
+        restaurantId: restaurantId,
+        staffId: null,
+        staffModel: null,
+      };
+    } else {
+      tenant = {
+        restaurantId: null,
+        staffId: null,
+        staffRole: null,
+      };
+    }
+  }
   const { contextRaw, contextHash } = tokenContext();
 
   res.cookie(isProd ? "__Host-ctx" : "ctx", contextRaw, {
@@ -81,15 +124,11 @@ const loginHandler = catchAsync(async (req, res) => {
     secure: isProd,
   });
 
-  const accessToken = signTokens.signAccessToken(
-    user.id,
-    user.role_id,
-    contextHash
-  );
+  const accessToken = signTokens.signAccessToken(user.id, contextHash, tenant);
 
-  const tokenId = crypto.randomUUID();
+  const refreshtokenId = crypto.randomUUID();
 
-  const refreshToken = signTokens.signRefreshToken(user.id, tokenId);
+  const refreshToken = signTokens.signRefreshToken(user.id, refreshtokenId);
 
   const decodedToken = jwt.decode(refreshToken);
   const expires_at = new Date(decodedToken.exp * 1000);
@@ -97,7 +136,7 @@ const loginHandler = catchAsync(async (req, res) => {
   const hashedToken = await argon2.hash(refreshToken);
 
   await refreshTokenModel.saveRefreshToken({
-    tokenId,
+    refreshtokenId,
     hashedToken,
     userId: user.id,
     expires_at,
@@ -140,7 +179,6 @@ const logoutHandler = catchAsync(async (req, res) => {
     }
   });
 
-  // delete refreshToken from the db
   decoded = jwt.decode(refreshToken);
   await refreshTokenModel.deleteRefreshToken(decoded.tokenId);
   res.sendStatus(204);
