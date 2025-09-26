@@ -1,10 +1,11 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const signAccessToken = (id, ctxHash, tenant) => {
+const signAccessToken = (id, globalRole, ctxHash, tenant) => {
   return jwt.sign(
     {
       sub: id,
+      globalRole: globalRole,
       ctx: ctxHash,
       tenant: tenant,
     },

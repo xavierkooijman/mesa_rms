@@ -111,7 +111,12 @@ const loginHandler = catchAsync(async (req, res) => {
     secure: isProd,
   });
 
-  const accessToken = signTokens.signAccessToken(user.id, contextHash, tenant);
+  const accessToken = signTokens.signAccessToken(
+    user.id,
+    user.user_role,
+    contextHash,
+    tenant
+  );
 
   const refreshtokenId = crypto.randomUUID();
 
