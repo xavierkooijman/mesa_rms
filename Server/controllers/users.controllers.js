@@ -73,47 +73,34 @@ const loginHandler = catchAsync(async (req, res) => {
     );
   }
 
-  const tenant = {};
+  const tenant = {
+    restaurantId: null,
+    staffId: null,
+    staffRole: null,
+  };
 
-  if ((user.user_role = "staff")) {
-    const staffMembershipCount = await staffModel.getStaffMembershipCount(
-      user.id
-    );
-    //if a user only has one staff membership we can set the tenant context,  else if the user has multiple staff memberships we set the tenant context to null. A staff member must always have a role.
+  if (user.user_role == "staff") {
+    const staff = await staffModel.getStaffByUserId(user.id);
+    //if a user only has one staff membership we can set the tenant context,  else if the user has multiple staff memberships tenant context remains null. A staff member must always have a role.
 
-    if (staffMembershipCount == 1) {
-      const staff = await staffModel.getStaffByUserId(user.id);
-      tenant = {
-        restaurantId: staff.restaurant_id,
-        staffId: staff.id,
-        staffRole: staff.staff_role,
-      };
-    } else {
-      tenant = {
-        restaurantId: null,
-        staffId: null,
-        staffRole: null,
-      };
+    if (staff.lenght == 1) {
+      tenant.restaurantId = staff[0].restaurant_id;
+      tenant.staffId = staff[0].id;
+      tenant.staffRole = staff[0].staff_role;
     }
-  } else if ((user.user_role = "owner")) {
-    const ownerRestaurantCount = await restaurantModel.getOwnerRestaurantCount(
+  } else if (user.user_role == "owner") {
+    const restaurantIds = await restaurantModel.getRestaurantIdsByOwnerId(
       user.id
     );
+
     // if user role is owner and only has one restaurant we can set the tenant context otherwise tenant fields must be null. staff related fields always null for owner roles.
-    if (ownerRestaurantCount == 1) {
-      tenant = {
-        restaurantId: restaurantId,
-        staffId: null,
-        staffModel: null,
-      };
-    } else {
-      tenant = {
-        restaurantId: null,
-        staffId: null,
-        staffRole: null,
-      };
+    if (restaurantIds.lenght == 1) {
+      tenant.restaurantId = restaurantIds[0].id;
     }
   }
+
+  console.log(tenant);
+
   const { contextRaw, contextHash } = tokenContext();
 
   res.cookie(isProd ? "__Host-ctx" : "ctx", contextRaw, {

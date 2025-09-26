@@ -1,12 +1,12 @@
 const db = require("../config/db");
 
 const saveRefreshToken = async (data) => {
-  const { tokenId, hashedToken, userId, expires_at } = data;
+  const { refreshtokenId, hashedToken, userId, expires_at } = data;
 
   const query =
     "INSERT INTO refresh_tokens(token_id, token_hash, user_id, expires_at) VALUES($1, $2, $3, $4)";
 
-  const values = [tokenId, hashedToken, userId, expires_at];
+  const values = [refreshtokenId, hashedToken, userId, expires_at];
 
   await db.writePool.query(query, values);
 };

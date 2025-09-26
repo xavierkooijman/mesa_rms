@@ -15,11 +15,11 @@ const signAccessToken = (id, ctxHash, tenant) => {
   );
 };
 
-const signRefreshToken = (id, tokenId) => {
+const signRefreshToken = (id, refreshtokenId) => {
   return jwt.sign(
     {
       sub: id,
-      tokenId: tokenId,
+      tokenId: refreshtokenId,
     },
     process.env.REFRESH_JWT_SECRET,
     {

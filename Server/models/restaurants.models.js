@@ -36,21 +36,21 @@ const updateRestaurantName = async (data) => {
   return rows[0];
 };
 
-const getOwnerRestaurantCount = async (ownerId) => {
+const getRestaurantIdsByOwnerId = async (ownerId) => {
   const query =
-    "SELECT COUNT(owner_id) FROM restaurants WHERE owner_id = $1 AND deleted_at IS NULL";
+    "SELECT id FROM restaurants WHERE owner_id = $1 AND deleted_at IS NULL";
 
   await db.readPool.query("BEGIN");
   await db.readPool.query(`SET LOCAL app.jwt_ownerId = ${ownerId}`);
 
   const { rows } = await db.readPool.query(query, [ownerId]);
   await db.readPool.query("COMMIT");
-  return rows[0];
+  return rows;
 };
 
 module.exports = {
   createRestaurant,
   checkIfRestaurantExists,
   updateRestaurantName,
-  getOwnerRestaurantCount,
+  getRestaurantIdsByOwnerId,
 };
