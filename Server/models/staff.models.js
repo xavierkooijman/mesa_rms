@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const getStaffByUserId = async (userId) => {
   const query =
-    "SELECT s.id,s.restaurant_id, sr.staff_role FROM staff s JOIN staff_roles sr ON s.role_id = sr.id WHERE s.deleted_at IS NULL";
+    "SELECT s.id,s.restaurant_id, sr.staff_role FROM staff s JOIN staff_roles sr ON s.role_id = sr.id WHERE s.user_id = $1 AND s.deleted_at IS NULL";
 
   await db.readPool.query("BEGIN");
   await db.readPool.query(`SET LOCAL app.jwt_userId = ${userId}`);
