@@ -2,8 +2,6 @@ const db = require("../config/db");
 
 const createRestaurant = async (name, ownerId) => {
   await db.writePool.query("BEGIN");
-
-  console.log(name, ownerId);
   await db.writePool.query(`SET LOCAL app.jwt_ownerId = ${ownerId}`);
 
   const { rows } = await db.writePool.query(
@@ -34,12 +32,25 @@ const updateRestaurantName = async (data) => {
 
   const values = [name, restaurantId];
 
-  const { rows } = await db.writePool(query, values);
+  const { rows } = await db.writePool.query(query, values);
   return rows[0];
+};
+
+const getRestaurantIdsByOwnerId = async (ownerId) => {
+  const query =
+    "SELECT id FROM restaurants WHERE owner_id = $1 AND deleted_at IS NULL";
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_ownerId = ${ownerId}`);
+
+  const { rows } = await db.readPool.query(query, [ownerId]);
+  await db.readPool.query("COMMIT");
+  return rows;
 };
 
 module.exports = {
   createRestaurant,
   checkIfRestaurantExists,
   updateRestaurantName,
+  getRestaurantIdsByOwnerId,
 };

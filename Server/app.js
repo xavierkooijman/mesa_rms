@@ -20,6 +20,7 @@ app.use(
 app.use(cookieParser());
 
 // Routes
+app.use("/auth", require("./routes/auth.routes"));
 app.use("/users", require("./routes/user.routes"));
 app.use("/restaurants", require("./routes/restaurant.routes"));
 

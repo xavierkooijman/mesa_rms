@@ -1,12 +1,13 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const signAccessToken = (id, role, ctxHash) => {
+const signAccessToken = (id, globalRole, ctxHash, tenant) => {
   return jwt.sign(
     {
       sub: id,
-      role: role,
+      globalRole: globalRole,
       ctx: ctxHash,
+      tenant: tenant,
     },
     process.env.ACCESS_JWT_SECRET,
     {
@@ -15,11 +16,11 @@ const signAccessToken = (id, role, ctxHash) => {
   );
 };
 
-const signRefreshToken = (id, tokenId) => {
+const signRefreshToken = (id, refreshtokenId) => {
   return jwt.sign(
     {
       sub: id,
-      tokenId: tokenId,
+      tokenId: refreshtokenId,
     },
     process.env.REFRESH_JWT_SECRET,
     {

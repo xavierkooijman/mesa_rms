@@ -21,7 +21,7 @@ const checkIfEmailExists = async (email) => {
 
 const getUserByEmail = async (email) => {
   const query =
-    "SELECT id, password_hash, role_id FROM users WHERE email = $1 LIMIT 1";
+    "SELECT u.id, u.password_hash, ur.user_role FROM users u JOIN user_roles ur ON u.role_id = ur.id WHERE email = $1 LIMIT 1";
 
   const { rows } = await db.readPool.query(query, [email]);
   return rows[0];

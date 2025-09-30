@@ -19,7 +19,6 @@ const createRestaurant = catchAsync(async (req, res) => {
       409
     );
   }
-  console.log(ownerId);
 
   const restaurant = await restaurantsModel.createRestaurant(name, ownerId);
 
@@ -52,6 +51,10 @@ const updateRestaurantName = catchAsync(async (req, res) => {
     message: "Restaurant name updated successfully",
     data: newName,
   });
+});
+
+const enterRestaurantDomain = catchAsync(async (req, res) => {
+  const restaurantId = req.params.restaurantId;
 });
 
 module.exports = { createRestaurant, updateRestaurantName };
