@@ -48,9 +48,22 @@ const getRestaurantIdsByOwnerId = async (ownerId) => {
   return rows;
 };
 
+const checkIfRestaurantExistsById = async (ownerId, restaurantId) => {
+  const query =
+    "SELECT id FROM restaurants WHERE id = $1 AND deleted_at IS NULL";
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_ownerId = ${ownerId}`);
+
+  const { rows } = await db.readPool.query(query, [restaurantId]);
+  await db.readPool.query("COMMIT");
+  return rows[0];
+};
+
 module.exports = {
   createRestaurant,
   checkIfRestaurantExists,
   updateRestaurantName,
   getRestaurantIdsByOwnerId,
+  checkIfRestaurantExistsById,
 };

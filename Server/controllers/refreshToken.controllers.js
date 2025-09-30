@@ -10,6 +10,10 @@ const argon2 = require("argon2");
 const isProd = process.env.NODE_ENV === "production";
 
 const handleRefreshToken = catchAsync(async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const accesstoken = authHeader.split(" ")[1];
+  const decodedAccessToken = jwt.decode(accesstoken);
+
   const refreshToken = req.cookies[isProd ? "__Host-refresh" : "refresh"];
 
   if (!refreshToken) {
@@ -30,10 +34,10 @@ const handleRefreshToken = catchAsync(async (req, res) => {
     }
   });
 
-  const decodedToken = jwt.decode(refreshToken);
+  const decodedRefreshToken = jwt.decode(refreshToken);
 
   const { token_hash, user_id } = await refreshTokenModel.getRefreshToken(
-    decodedToken.tokenId
+    decodedRefreshToken.tokenId
   );
 
   const tokenMatch = await argon2.verify(token_hash, refreshToken);
@@ -46,7 +50,7 @@ const handleRefreshToken = catchAsync(async (req, res) => {
     );
   }
 
-  if (decodedToken.sub != user_id) {
+  if (decodedRefreshToken.sub != user_id) {
     throw new AppError(
       "Session invalid or expired",
       ERROR_CODES.AUTH_UNAUTHORIZED,
@@ -65,9 +69,10 @@ const handleRefreshToken = catchAsync(async (req, res) => {
   });
 
   const accessToken = signTokens.signAccessToken(
-    decodedToken.sub,
-    decodedToken.role,
-    contextHash
+    decodedAccessToken.sub,
+    decodedAccessToken.globalRole,
+    contextHash,
+    decodedAccessToken.tenant
   );
 
   res.status(200).json({ accessToken });

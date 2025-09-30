@@ -138,4 +138,52 @@ const logoutHandler = catchAsync(async (req, res) => {
   res.sendStatus(204);
 });
 
-module.exports = { loginHandler, logoutHandler };
+const enterRestaurantDomain = catchAsync(async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  const authHeader = req.headers["authorization"];
+  const accesstoken = authHeader.split(" ")[1];
+  const decodedAccessToken = jwt.decode(accesstoken);
+  const globalRole = decodedAccessToken.globalRole;
+  const userId = decodedAccessToken.sub;
+  const ctxHash = decodedAccessToken.ctx;
+
+  const tenant = {
+    restaurantId: null,
+    staffId: null,
+    staffRole: null,
+  };
+
+  //check if multiple staff come back or not. It is inforced in the db but research more about it.
+  //throw an error if the req restaurantId doest exist or doest have a staff related to the user and restaurant, throw an error for owner too if trying to enter a restaurant that doesnt exist in the db.
+
+  if (globalRole == "staff") {
+    const staff = await staffModel.getSingleStaffByRestaurantId(
+      userId,
+      restaurantId
+    );
+    if (staff) {
+      tenant.restaurantId = staff.restaurant_id;
+      tenant.staffId = staff.id;
+      tenant.staffRole = staff.staff_role;
+    }
+  } else if (globalRole == "owner") {
+    const restaurantExists = await restaurantModel.checkIfRestaurantExistsById(
+      userId,
+      restaurantId
+    );
+
+    if (restaurantExists) {
+      tenant.restaurantId = restaurantExists.id;
+    }
+  }
+
+  //need to create a new refresh token with the hashed access token
+  const newAccessToken = signTokens.signAccessToken(
+    userId,
+    globalRole,
+    ctxHash,
+    tenant
+  );
+});
+
+module.exports = { loginHandler, logoutHandler, enterRestaurantDomain };
