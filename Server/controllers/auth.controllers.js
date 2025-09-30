@@ -140,12 +140,10 @@ const logoutHandler = catchAsync(async (req, res) => {
 
 const enterRestaurantDomain = catchAsync(async (req, res) => {
   const restaurantId = req.params.restaurantId;
-  const authHeader = req.headers["authorization"];
-  const accesstoken = authHeader.split(" ")[1];
-  const decodedAccessToken = jwt.decode(accesstoken);
-  const globalRole = decodedAccessToken.globalRole;
-  const userId = decodedAccessToken.sub;
-  const ctxHash = decodedAccessToken.ctx;
+  const globalRole = req.token.globalRole;
+  const userId = req.token.sub;
+  const oldRefreshToken = req.cookies[isProd ? "__Host-refresh" : "refresh"];
+  const decodedRefreshToken = jwt.decode(oldRefreshToken);
 
   const tenant = {
     restaurantId: null,
@@ -177,13 +175,50 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
     }
   }
 
-  //need to create a new refresh token with the hashed access token
+  const { contextRaw, contextHash } = tokenContext();
+
   const newAccessToken = signTokens.signAccessToken(
     userId,
     globalRole,
-    ctxHash,
+    contextHash,
     tenant
   );
+
+  const refreshtokenId = crypto.randomUUID();
+
+  const refreshToken = signTokens.signRefreshToken(userId, refreshtokenId);
+
+  const decodedToken = jwt.decode(refreshToken);
+  const expires_at = new Date(decodedToken.exp * 1000);
+
+  const hashedToken = await argon2.hash(refreshToken);
+
+  await refreshTokenModel.deleteRefreshToken(decodedRefreshToken.tokenId);
+
+  await refreshTokenModel.saveRefreshToken({
+    refreshtokenId,
+    hashedToken,
+    userId: userId,
+    expires_at,
+  });
+
+  res.cookie(isProd ? "__Host-ctx" : "ctx", contextRaw, {
+    httpOnly: true,
+    maxAge: 15 * 60 * 1000,
+    sameSite: "Strict",
+    path: "/",
+    secure: isProd,
+  });
+
+  res.cookie(isProd ? "__Host-refresh" : "refresh", refreshToken, {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 * 30,
+    sameSite: "Strict",
+    path: "/",
+    secure: isProd,
+  });
+
+  res.status(200).json({ newAccessToken });
 });
 
 module.exports = { loginHandler, logoutHandler, enterRestaurantDomain };
