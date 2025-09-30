@@ -53,8 +53,4 @@ const updateRestaurantName = catchAsync(async (req, res) => {
   });
 });
 
-const enterRestaurantDomain = catchAsync(async (req, res) => {
-  const restaurantId = req.params.restaurantId;
-});
-
 module.exports = { createRestaurant, updateRestaurantName };
