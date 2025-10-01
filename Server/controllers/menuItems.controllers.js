@@ -5,7 +5,7 @@ const ERROR_CODES = require("../utils/errorCodes");
 
 const createMenuItem = catchAsync(async (req, res) => {
   const { name, price } = req.body;
-  const restaurantId = req.token.tenant;
+  const restaurantId = req.token.tenant.restaurantId;
 
   const menuItemExists = await menuItemModel.checkIfMenuItemExists(
     restaurantId,
