@@ -82,10 +82,14 @@ const loginHandler = catchAsync(async (req, res) => {
 
   const refreshtokenId = crypto.randomUUID();
 
-  const refreshToken = signTokens.signRefreshToken(user.id, refreshtokenId);
+  const now = Math.floor(Date.now() / 1000);
+  const expiresIn = now + 30 * 24 * 60 * 60;
 
-  const decodedToken = jwt.decode(refreshToken);
-  const expires_at = new Date(decodedToken.exp * 1000);
+  const refreshToken = signTokens.signRefreshToken(
+    user.id,
+    refreshtokenId,
+    expiresIn
+  );
 
   const hashedToken = await argon2.hash(refreshToken);
 
@@ -93,7 +97,7 @@ const loginHandler = catchAsync(async (req, res) => {
     refreshtokenId,
     hashedToken,
     userId: user.id,
-    expires_at,
+    expires_at: new Date(expiresIn * 1000),
   });
 
   res.cookie(isProd ? "__Host-refresh" : "refresh", refreshToken, {
@@ -151,7 +155,6 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
     staffRole: null,
   };
 
-  //check if multiple staff come back or not. It is inforced in the db but research more about it.
   //throw an error if the req restaurantId doest exist or doest have a staff related to the user and restaurant, throw an error for owner too if trying to enter a restaurant that doesnt exist in the db.
 
   if (globalRole == "staff") {
@@ -177,7 +180,7 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
 
   const { contextRaw, contextHash } = tokenContext();
 
-  const newAccessToken = signTokens.signAccessToken(
+  const accessToken = signTokens.signAccessToken(
     userId,
     globalRole,
     contextHash,
@@ -186,10 +189,14 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
 
   const refreshtokenId = crypto.randomUUID();
 
-  const refreshToken = signTokens.signRefreshToken(userId, refreshtokenId);
+  //implement refresh token rotation, send old token expire date
 
-  const decodedToken = jwt.decode(refreshToken);
-  const expires_at = new Date(decodedToken.exp * 1000);
+  const expiresAt = new Date(decodedRefreshToken.exp * 1000);
+  const refreshToken = signTokens.signRefreshToken(
+    userId,
+    refreshtokenId,
+    decodedRefreshToken.exp
+  );
 
   const hashedToken = await argon2.hash(refreshToken);
 
@@ -199,7 +206,7 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
     refreshtokenId,
     hashedToken,
     userId: userId,
-    expires_at,
+    expires_at: expiresAt,
   });
 
   res.cookie(isProd ? "__Host-ctx" : "ctx", contextRaw, {
@@ -218,7 +225,7 @@ const enterRestaurantDomain = catchAsync(async (req, res) => {
     secure: isProd,
   });
 
-  res.status(200).json({ newAccessToken });
+  res.status(200).json({ accessToken });
 });
 
 module.exports = { loginHandler, logoutHandler, enterRestaurantDomain };

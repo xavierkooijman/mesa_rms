@@ -16,16 +16,14 @@ const signAccessToken = (id, globalRole, ctxHash, tenant) => {
   );
 };
 
-const signRefreshToken = (id, refreshtokenId) => {
+const signRefreshToken = (id, refreshtokenId, expiresAt) => {
   return jwt.sign(
     {
       sub: id,
       tokenId: refreshtokenId,
+      exp: expiresAt,
     },
-    process.env.REFRESH_JWT_SECRET,
-    {
-      expiresIn: "30d",
-    }
+    process.env.REFRESH_JWT_SECRET
   );
 };
 
