@@ -37,6 +37,8 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
+  console.error("Unexpected error:", error);
+
   return res.status(500).json({
     errorCode: errorCodes.INTERNAL_SERVER_ERROR,
     message: "Something went wrong",
