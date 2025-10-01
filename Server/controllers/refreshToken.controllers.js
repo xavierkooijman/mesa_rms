@@ -68,6 +68,35 @@ const handleRefreshToken = catchAsync(async (req, res) => {
     secure: isProd,
   });
 
+  const refreshtokenId = crypto.randomUUID();
+
+  const expiresAt = new Date(decodedRefreshToken.exp * 1000);
+
+  const newRefreshToken = signTokens.signRefreshToken(
+    decodedAccessToken.sub,
+    refreshtokenId,
+    decodedRefreshToken.exp
+  );
+
+  const hashedToken = await argon2.hash(newRefreshToken);
+
+  await refreshTokenModel.deleteRefreshToken(decodedRefreshToken.tokenId);
+
+  await refreshTokenModel.saveRefreshToken({
+    refreshtokenId,
+    hashedToken,
+    userId: decodedAccessToken.sub,
+    expires_at: expiresAt,
+  });
+
+  res.cookie(isProd ? "__Host-refresh" : "refresh", newRefreshToken, {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 * 30,
+    sameSite: "Strict",
+    path: "/",
+    secure: isProd,
+  });
+
   const accessToken = signTokens.signAccessToken(
     decodedAccessToken.sub,
     decodedAccessToken.globalRole,
