@@ -6,6 +6,13 @@ const checkIfShapeExistsById = async (shapeId) => {
   return rows[0];
 };
 
+const getShapes = async () => {
+  const query = "SELECT id, shape_name FROM table_shapes ORDER BY shape_name";
+  const { rows } = await db.readPool.query(query);
+  return rows;
+};
+
 module.exports = {
   checkIfShapeExistsById,
+  getShapes,
 };

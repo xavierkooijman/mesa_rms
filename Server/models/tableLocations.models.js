@@ -34,8 +34,20 @@ const checkIfLocationExistsByName = async (restaurantId, name) => {
   return rows[0];
 };
 
+const getLocationsByRestaurant = async (restaurantId) => {
+  const query =
+    "SELECT id, table_location FROM table_locations WHERE restaurant_id = $1 ORDER BY table_location";
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
+  const { rows } = await db.readPool.query(query, [restaurantId]);
+  await db.readPool.query("COMMIT");
+  return rows;
+};
+
 module.exports = {
   createLocation,
   checkIfLocationExistsById,
   checkIfLocationExistsByName,
+  getLocationsByRestaurant,
 };
