@@ -26,6 +26,7 @@ app.use("/restaurants", require("./routes/restaurant.routes"));
 app.use("/menu-items", require("./routes/menuItem.routes"));
 app.use("/menu-categories", require("./routes/menuCategories.routes"));
 app.use("/tables", require("./routes/table.routes"));
+app.use("/table-locations", require("./routes/tableLocation.routes"));
 
 // Error handler
 app.use(errorHandler);
