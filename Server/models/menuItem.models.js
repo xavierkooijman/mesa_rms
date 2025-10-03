@@ -1,11 +1,11 @@
 const db = require("../config/db");
 
 const createMenuItem = async (data) => {
-  const { restaurantId, name, price } = data;
+  const { restaurantId, name, price, categoryId = null } = data;
   const query =
-    "INSERT INTO menu_items(restaurant_id, item_name, price) VALUES($1, $2, $3)";
+    "INSERT INTO menu_items(restaurant_id, item_name, price, category_id) VALUES($1, $2, $3, $4) RETURNING id, item_name, price, category_id";
 
-  values = [restaurantId, name, price];
+  values = [restaurantId, name, price, categoryId];
 
   await db.writePool.query("BEGIN");
   await db.writePool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
@@ -28,4 +28,20 @@ const checkIfMenuItemExists = async (restaurantId, name) => {
   return rows[0];
 };
 
-module.exports = { createMenuItem, checkIfMenuItemExists };
+const checkIfCategoryExists = async (restaurantId, categoryId) => {
+  const query =
+    "SELECT id FROM menu_categories WHERE restaurant_id = $1 AND id = $2";
+  values = [restaurantId, categoryId];
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
+  const { rows } = await db.readPool.query(query, values);
+  await db.readPool.query("COMMIT");
+  return rows[0];
+};
+
+module.exports = {
+  createMenuItem,
+  checkIfMenuItemExists,
+  checkIfCategoryExists,
+};

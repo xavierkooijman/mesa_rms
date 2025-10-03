@@ -4,7 +4,7 @@ const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 
 const createMenuItem = catchAsync(async (req, res) => {
-  const { name, price } = req.body;
+  const { name, price, categoryId } = req.body;
   const restaurantId = req.token.tenant.restaurantId;
 
   const menuItemExists = await menuItemModel.checkIfMenuItemExists(
@@ -20,10 +20,24 @@ const createMenuItem = catchAsync(async (req, res) => {
     );
   }
 
+  const categoryExists = await menuItemModel.checkIfCategoryExists(
+    restaurantId,
+    categoryId
+  );
+
+  if (categoryId && !categoryExists) {
+    throw new AppError(
+      "The specified category does not exist",
+      ERROR_CODES.CATEGORY_NOT_FOUND,
+      404
+    );
+  }
+
   const menuItem = await menuItemModel.createMenuItem({
     restaurantId,
     name,
     price,
+    categoryId,
   });
 
   res.status(201).json({
