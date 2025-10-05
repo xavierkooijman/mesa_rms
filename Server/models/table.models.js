@@ -50,7 +50,7 @@ const checkIfTableExists = async (restaurantId, tableNumber) => {
 const getTablesByRestaurant = async (restaurantId) => {
   const query = `
     SELECT t.id, t.table_number, t.capacity, t.position_x, t.position_y, t.rotation,
-            ts.shape_name, tl.table_location, tstatus.status
+            ts.shape, tl.table_location, tstatus.status
     FROM tables t
     JOIN table_shapes ts ON t.shape_id = ts.id
     JOIN table_locations tl ON t.location_id = tl.id

@@ -7,7 +7,7 @@ const checkIfShapeExistsById = async (shapeId) => {
 };
 
 const getShapes = async () => {
-  const query = "SELECT id, shape_name FROM table_shapes ORDER BY shape_name";
+  const query = "SELECT id, shape FROM table_shapes ORDER BY shape";
   const { rows } = await db.readPool.query(query);
   return rows;
 };
