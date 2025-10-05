@@ -1,5 +1,6 @@
 const catchAsync = require("../utils/catchAsync");
 const menuItemModel = require("../models/menuItem.models");
+const menuCategoryModel = require("../models/menuCategories.models");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 
@@ -20,7 +21,7 @@ const createMenuItem = catchAsync(async (req, res) => {
     );
   }
 
-  const categoryExists = await menuItemModel.checkIfCategoryExists(
+  const categoryExists = await menuCategoryModel.checkIfMenuCategoryExists(
     restaurantId,
     categoryId
   );

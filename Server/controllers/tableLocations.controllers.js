@@ -27,6 +27,18 @@ const createTableLocation = catchAsync(async (req, res) => {
   });
 });
 
+const getTableLocations = catchAsync(async (req, res) => {
+  const restaurantId = req.token.tenant.restaurantId;
+  const locations = await tableLocationModel.getLocationsByRestaurant(
+    restaurantId
+  );
+  res.status(200).json({
+    message: "Table locations retrieved successfully",
+    data: locations,
+  });
+});
+
 module.exports = {
   createTableLocation,
+  getTableLocations,
 };

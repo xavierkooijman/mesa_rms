@@ -67,4 +67,13 @@ const createTable = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { createTable };
+const getTablesByRestaurant = catchAsync(async (req, res) => {
+  const restaurantId = req.token.tenant.restaurantId;
+  const tables = await tableModel.getTablesByRestaurant(restaurantId);
+  res.status(200).json({
+    message: "Tables retrieved successfully",
+    data: tables,
+  });
+});
+
+module.exports = { createTable, getTablesByRestaurant };

@@ -11,5 +11,6 @@ router.post(
   validate(tableValidation.createTableSchema),
   tablesController.createTable
 );
+router.get("/", verifyToken, tablesController.getTablesByRestaurant);
 
 module.exports = router;
