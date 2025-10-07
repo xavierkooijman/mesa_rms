@@ -47,6 +47,17 @@ const checkIfTableExists = async (restaurantId, tableNumber) => {
   return rows[0];
 };
 
+const checkIfTableExistsById = async (restaurantId, tableId) => {
+  const query = "SELECT id FROM tables WHERE restaurant_id = $1 AND id = $2";
+  const values = [restaurantId, tableId];
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
+  const { rows } = await db.readPool.query(query, values);
+  await db.readPool.query("COMMIT");
+  return rows[0];
+};
+
 const getTablesByRestaurant = async (restaurantId) => {
   const query = `
     SELECT t.id, t.table_number, t.capacity, t.position_x, t.position_y, t.rotation,
@@ -70,4 +81,5 @@ module.exports = {
   createTable,
   checkIfTableExists,
   getTablesByRestaurant,
+  checkIfTableExistsById,
 };

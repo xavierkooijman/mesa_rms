@@ -14,7 +14,7 @@ router.post(
 router.get("/refresh", refreshTokenController.handleRefreshToken);
 router.post("/logout", authController.logoutHandler);
 router.post(
-  "/select-restaurant/:restaurantId",
+  "/select-restaurant/:id",
   verifyToken,
   authController.enterRestaurantDomain
 );

@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const createMenuCategorySchema = Joi.object({
   name: Joi.string().required(),
-  parentCategoryId: Joi.number().integer().min(1).allow(null),
+  parentCategoryId: Joi.number().integer().positive().allow(null),
 });
 
 module.exports = { createMenuCategorySchema };
