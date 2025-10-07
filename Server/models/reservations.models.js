@@ -29,7 +29,8 @@ const createReservation = async (data) => {
 };
 
 const checkIfReservationExistsById = async (restaurantId, reservationId) => {
-  const query = "SELECT id FROM reservations WHERE restaurant_id=$1 AND id=$2";
+  const query =
+    "SELECT id, status_id FROM reservations WHERE restaurant_id=$1 AND id=$2";
   const values = [restaurantId, reservationId];
 
   await db.readPool.query("BEGIN");

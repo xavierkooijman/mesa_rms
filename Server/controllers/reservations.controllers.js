@@ -4,6 +4,7 @@ const tablesModel = require("../models/table.models");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 const { ReservationStatus } = require("../constants/enums");
+const { canChangeReservationStatus } = require("../utils/canChangeStatus");
 
 const createReservation = catchAsync(async (req, res) => {
   const { tableId, numberPeople, startTime, endTime, reservationName } =
@@ -53,6 +54,19 @@ const cancelReservation = catchAsync(async (req, res) => {
     );
   }
 
+  const cancelAllowed = canChangeReservationStatus(
+    reservation.status_id,
+    ReservationStatus.CANCELLED
+  );
+
+  if (!cancelAllowed) {
+    throw new AppError(
+      "Reservation cannot be cancelled",
+      ERROR_CODES.RESERVATION_CANNOT_BE_CANCELLED,
+      400
+    );
+  }
+
   const reservationStatus = await reservationsModel.changeReservationStatus({
     restaurantId,
     reservationId,
@@ -82,6 +96,19 @@ const noShowReservation = catchAsync(async (req, res) => {
     );
   }
 
+  const noShowAllowed = canChangeReservationStatus(
+    reservation.status_id,
+    ReservationStatus.NO_SHOW
+  );
+
+  if (!noShowAllowed) {
+    throw new AppError(
+      "Reservation cannot be marked as no show",
+      ERROR_CODES.RESERVATION_CANNOT_BE_MARKED_NO_SHOW,
+      400
+    );
+  }
+
   const reservationStatus = await reservationsModel.changeReservationStatus({
     restaurantId,
     reservationId,
@@ -108,6 +135,19 @@ const showReservation = catchAsync(async (req, res) => {
       "Reservation not found",
       ERROR_CODES.RESERVATION_NOT_FOUND,
       404
+    );
+  }
+
+  const showAllowed = canChangeReservationStatus(
+    reservation.status_id,
+    ReservationStatus.NO_SHOW
+  );
+
+  if (!showAllowed) {
+    throw new AppError(
+      "Reservation cannot be marked as show",
+      ERROR_CODES.RESERVATION_CANNOT_BE_MARKED_SHOW,
+      400
     );
   }
 
