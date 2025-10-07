@@ -28,4 +28,32 @@ const createReservation = async (data) => {
   return rows[0];
 };
 
-module.exports = { createReservation };
+const checkIfReservationExistsById = async (restaurantId, reservationId) => {
+  const query = "SELECT id FROM reservations WHERE restaurant_id=$1 AND id=$2";
+  const values = [restaurantId, reservationId];
+
+  await db.readPool.query("BEGIN");
+  await db.readPool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
+  const { rows } = await db.readPool.query(query, values);
+  await db.readPool.query("COMMIT");
+  return rows[0];
+};
+
+const changeReservationStatus = async (data) => {
+  const { restaurantId, reservationId, statusId } = data;
+  const query =
+    "UPDATE reservations r SET status_id=$1 FROM reservation_status rs WHERE r.id=$2 AND rs.id=$1 RETURNING rs.status";
+  const values = [statusId, reservationId];
+
+  await db.writePool.query("BEGIN");
+  await db.writePool.query(`SET LOCAL app.jwt_restaurantId = ${restaurantId}`);
+  const { rows } = await db.writePool.query(query, values);
+  await db.writePool.query("COMMIT");
+  return rows[0];
+};
+
+module.exports = {
+  createReservation,
+  changeReservationStatus,
+  checkIfReservationExistsById,
+};

@@ -143,7 +143,7 @@ const logoutHandler = catchAsync(async (req, res) => {
 });
 
 const enterRestaurantDomain = catchAsync(async (req, res) => {
-  const restaurantId = req.params.restaurantId;
+  const restaurantId = req.params.id;
   const globalRole = req.token.globalRole;
   const userId = req.token.sub;
   const oldRefreshToken = req.cookies[isProd ? "__Host-refresh" : "refresh"];
