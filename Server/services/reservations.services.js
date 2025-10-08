@@ -1,8 +1,16 @@
 const reservationsModel = require("../models/reservations.models");
+const tablesServices = require("./tables.services");
 const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 const { ReservationStatus } = require("../constants/enums");
 const { canChangeReservationStatus } = require("../utils/canChangeStatus");
+
+const createReservation = async (data) => {
+  await tablesServices.checkIfTableExistsById(data.restaurantId, data.tableId);
+
+  const reservation = await reservationsModel.createReservation(data);
+  return reservation;
+};
 
 const checkIfReservationExistsById = async (restaurantId, reservationId) => {
   const reservation = await reservationsModel.checkIfReservationExistsById(
@@ -21,13 +29,14 @@ const checkIfReservationExistsById = async (restaurantId, reservationId) => {
   return reservation;
 };
 
-const cancelReservation = async (
-  restaurantId,
-  reservationId,
-  currentStatusId
-) => {
+const cancelReservation = async (restaurantId, reservationId) => {
+  const reservation = await checkIfReservationExistsById(
+    restaurantId,
+    reservationId
+  );
+
   const cancelAllowed = canChangeReservationStatus(
-    currentStatusId,
+    reservation.status_id,
     ReservationStatus.CANCELLED
   );
 
@@ -48,4 +57,8 @@ const cancelReservation = async (
   return reservationStatus;
 };
 
-module.exports = { checkIfReservationExistsById, cancelReservation };
+module.exports = {
+  createReservation,
+  checkIfReservationExistsById,
+  cancelReservation,
+};

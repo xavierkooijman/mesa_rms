@@ -13,9 +13,7 @@ const createReservation = catchAsync(async (req, res) => {
     req.body;
   const restaurantId = req.token.tenant.restaurantId;
 
-  await tablesServices.checkIfTableExistsById(restaurantId, tableId);
-
-  const reservation = await reservationsModel.createReservation({
+  const reservation = await reservationsServices.createReservation({
     restaurantId,
     tableId,
     numberPeople,
@@ -33,15 +31,9 @@ const cancelReservation = catchAsync(async (req, res) => {
   const reservationId = req.params.id;
   const restaurantId = req.token.tenant.restaurantId;
 
-  const reservation = await reservationsServices.checkIfReservationExistsById(
-    restaurantId,
-    reservationId
-  );
-
   const reservationStatus = await reservationsServices.cancelReservation(
     restaurantId,
-    reservationId,
-    reservation.status_id
+    reservationId
   );
 
   res.status(200).json({
