@@ -5,24 +5,16 @@ const AppError = require("../utils/AppError");
 const ERROR_CODES = require("../utils/errorCodes");
 const { ReservationStatus } = require("../constants/enums");
 const { canChangeReservationStatus } = require("../utils/canChangeStatus");
+const reservationsServices = require("../services/reservations.services");
+const tablesServices = require("../services/tables.services");
 
 const createReservation = catchAsync(async (req, res) => {
   const { tableId, numberPeople, startTime, endTime, reservationName } =
     req.body;
   const restaurantId = req.token.tenant.restaurantId;
 
-  const tableExists = await tablesModel.checkIfTableExistsById(
-    restaurantId,
-    tableId
-  );
+  await tablesServices.checkIfTableExistsById(restaurantId, tableId);
 
-  if (!tableExists) {
-    throw new AppError(
-      "Table does not exist in this restaurant",
-      ERROR_CODES.TABLE_NOT_FOUND,
-      404
-    );
-  }
   const reservation = await reservationsModel.createReservation({
     restaurantId,
     tableId,
@@ -41,37 +33,16 @@ const cancelReservation = catchAsync(async (req, res) => {
   const reservationId = req.params.id;
   const restaurantId = req.token.tenant.restaurantId;
 
-  const reservation = await reservationsModel.checkIfReservationExistsById(
+  const reservation = await reservationsServices.checkIfReservationExistsById(
     restaurantId,
     reservationId
   );
 
-  if (!reservation) {
-    throw new AppError(
-      "Reservation not found",
-      ERROR_CODES.RESERVATION_NOT_FOUND,
-      404
-    );
-  }
-
-  const cancelAllowed = canChangeReservationStatus(
-    reservation.status_id,
-    ReservationStatus.CANCELLED
-  );
-
-  if (!cancelAllowed) {
-    throw new AppError(
-      "Reservation cannot be cancelled",
-      ERROR_CODES.RESERVATION_CANNOT_BE_CANCELLED,
-      400
-    );
-  }
-
-  const reservationStatus = await reservationsModel.changeReservationStatus({
+  const reservationStatus = await reservationsServices.cancelReservation(
     restaurantId,
     reservationId,
-    statusId: ReservationStatus.CANCELLED,
-  });
+    reservation.status_id
+  );
 
   res.status(200).json({
     message: "Reservation cancelled sucessfully",
@@ -83,18 +54,10 @@ const noShowReservation = catchAsync(async (req, res) => {
   const reservationId = req.params.id;
   const restaurantId = req.token.tenant.restaurantId;
 
-  const reservation = await reservationsModel.checkIfReservationExistsById(
+  const reservation = await reservationsServices.checkIfReservationExistsById(
     restaurantId,
     reservationId
   );
-
-  if (!reservation) {
-    throw new AppError(
-      "Reservation not found",
-      ERROR_CODES.RESERVATION_NOT_FOUND,
-      404
-    );
-  }
 
   const noShowAllowed = canChangeReservationStatus(
     reservation.status_id,
@@ -125,18 +88,10 @@ const showReservation = catchAsync(async (req, res) => {
   const reservationId = req.params.id;
   const restaurantId = req.token.tenant.restaurantId;
 
-  const reservation = await reservationsModel.checkIfReservationExistsById(
+  await reservationsServices.checkIfReservationExistsById(
     restaurantId,
     reservationId
   );
-
-  if (!reservation) {
-    throw new AppError(
-      "Reservation not found",
-      ERROR_CODES.RESERVATION_NOT_FOUND,
-      404
-    );
-  }
 
   const showAllowed = canChangeReservationStatus(
     reservation.status_id,
