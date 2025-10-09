@@ -57,8 +57,66 @@ const cancelReservation = async (restaurantId, reservationId) => {
   return reservationStatus;
 };
 
+const noShowReservation = async (restaurantId, reservationId) => {
+  const reservation = await checkIfReservationExistsById(
+    restaurantId,
+    reservationId
+  );
+
+  const noShowAllowed = canChangeReservationStatus(
+    reservation.status_id,
+    ReservationStatus.NO_SHOW
+  );
+
+  if (!noShowAllowed) {
+    throw new AppError(
+      "Reservation cannot be marked as no show",
+      ERROR_CODES.RESERVATION_CANNOT_BE_MARKED_NO_SHOW,
+      400
+    );
+  }
+
+  const reservationStatus = await reservationsModel.changeReservationStatus({
+    restaurantId,
+    reservationId,
+    statusId: ReservationStatus.NO_SHOW,
+  });
+
+  return reservationStatus;
+};
+
+const showReservation = async (restaurantId, reservationId) => {
+  const reservation = await checkIfReservationExistsById(
+    restaurantId,
+    reservationId
+  );
+
+  const showAllowed = canChangeReservationStatus(
+    reservation.status_id,
+    ReservationStatus.NO_SHOW
+  );
+
+  if (!showAllowed) {
+    throw new AppError(
+      "Reservation cannot be marked as show",
+      ERROR_CODES.RESERVATION_CANNOT_BE_MARKED_SHOW,
+      400
+    );
+  }
+
+  const reservationStatus = await reservationsModel.changeReservationStatus({
+    restaurantId,
+    reservationId,
+    statusId: ReservationStatus.SHOW,
+  });
+
+  return reservationStatus;
+};
+
 module.exports = {
   createReservation,
   checkIfReservationExistsById,
   cancelReservation,
+  noShowReservation,
+  showReservation,
 };
